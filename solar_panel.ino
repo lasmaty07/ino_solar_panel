@@ -9,6 +9,11 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 #define MONTHS 12
 #define HOURS 15
 
+unsigned long firstTime;
+unsigned long millis_held;    
+unsigned long secs_held;
+//(millis() - firstTime);
+
 typedef struct 
 {
    int humidity;
@@ -18,8 +23,8 @@ typedef struct
  
 record_type matrix[MONTHS][HOURS];
 
-int i = MONTHS;
-int j = HOURS;
+int i = 0;
+int j = 0;
 
 
 void setup() {
@@ -62,7 +67,7 @@ void readData(){
 
 void printData(){
 	//TODO 
-	//if end of month print stats
+	//if end of month print stats -> do math
 	
 	//TODO if end of year -> do math......
 }
