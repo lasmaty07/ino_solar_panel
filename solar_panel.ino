@@ -8,12 +8,9 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 #define RedLed 5
 #define MONTHS 12
 #define HOURS 15
-#define INTERVAL 10
+#define INTERVAL 100
 
 unsigned long lastTime;
-unsigned long millis_held;    
-unsigned long secs_held;
-//(millis() - firstTime);
 
 typedef struct 
 {
@@ -25,7 +22,7 @@ typedef struct
 record_type matrix[MONTHS][HOURS];
 
 int i = 0;
-int j = 0;
+int j = -1 ; //ugly af
 
 
 void setup() {
@@ -62,22 +59,26 @@ void readData(){
 		lastTime = millis();
 		
 		//int lumens = mapLumens();
-		int lumens = random(1, 101);
+		//para no tener que iluminar
+		int lumens = random(10, 101); //delete after test
 		
-		if (j < (HOURS - 1) ){
+		
+		if (j < (HOURS -1 ) ){
 			j++;
 		} else {
 			j = 0;
 			i++;		
 		}
+			
 		Serial.print("Se leyeron :");
 		Serial.print(lumens);
 		Serial.print(" Se grabaran en :");
 		Serial.print(i);
-		Serial.print(" ");
-		Serial.println(j);
-		
+		Serial.print(" ,");
+		Serial.println(j);		
+	
 		matrix[i][j].lumens = lumens;
+		
 	}
 }
 
@@ -91,7 +92,7 @@ void printData(){
 		for (int k = 0 ; k < MONTHS ; k++){
 			Serial.print("|");			
 			for(int p = 0 ; p < HOURS ; p++){
-				Serial.print(",");			
+				if	(p != 0 ) Serial.print(",");			
 				Serial.print(matrix[k][p].lumens);			
 			}
 			Serial.println("|");			
@@ -112,5 +113,5 @@ int mapLumens(){
 }
 
 bool dataComplete(){
-	return (j == HOURS-1 && i == MONTHS-1);
+	return (j == HOURS -1 && i == MONTHS -1 );
 }
