@@ -59,6 +59,7 @@ void readData(){
 		lastTime = millis();
 		
 		//int lumens = mapLumens();
+		
 		//para no tener que iluminar
 		int lumens = random(10, 101); //delete after test
 		
@@ -69,7 +70,7 @@ void readData(){
 			j = 0;
 			i++;		
 		}
-			
+
 		Serial.print("Se leyeron :");
 		Serial.print(lumens);
 		Serial.print(" Se grabaran en :");
@@ -86,7 +87,7 @@ void printData(){
 	//TODO 
 	//if end of month print stats -> do math
 	
-	//just a test
+	//show matrix via Serial
 	if (dataComplete()){
 		delay(1000);
 		for (int k = 0 ; k < MONTHS ; k++){
