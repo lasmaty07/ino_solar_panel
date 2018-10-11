@@ -8,7 +8,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 #define RedLed 5
 #define MONTHS 12
 #define HOURS 15
-#define INTERVAL 500
+#define INTERVAL 10
 
 unsigned long lastTime;
 unsigned long millis_held;    
@@ -87,11 +87,12 @@ void printData(){
 	
 	//just a test
 	if (dataComplete()){
+		delay(1000);
 		for (int k = 0 ; k < MONTHS ; k++){
 			Serial.print("|");			
 			for(int p = 0 ; p < HOURS ; p++){
 				Serial.print(",");			
-				Serial.print(matrix[i][j].lumens);			
+				Serial.print(matrix[k][p].lumens);			
 			}
 			Serial.println("|");			
 		}
@@ -111,5 +112,5 @@ int mapLumens(){
 }
 
 bool dataComplete(){
-	return (j == HOURS && i == MONTHS);
+	return (j == HOURS-1 && i == MONTHS-1);
 }
