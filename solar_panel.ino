@@ -73,10 +73,6 @@ void readData(){
 		
 		lastHour = millis();
 
-		
-		//para no tener que iluminar
-		//int lumens = random(10, 101); //delete after test
-
 		int lumens = totLumens / mediciones ; //al ser int, solo guarda int
 
 		
@@ -108,6 +104,8 @@ void printData(){
 	//TODO 
 	//if end of month print stats -> do math
 	
+	//TODO if end of year -> do more math......
+	
 	//show matrix via Serial
 	if (dataComplete()){
 		delay(1000);
@@ -121,7 +119,15 @@ void printData(){
 		}
 	}
 	
-	//TODO if end of year -> do more math......
+	
+	if (!dataComplete()){
+		digitalWrite(RedLed,HIGH);
+	}else {
+		digitalWrite(RedLed,LOW);
+		digitalWrite(GreenLed,HIGH);
+	}
+	
+	
 }
 
 void buttonListener(){
