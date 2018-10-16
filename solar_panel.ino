@@ -9,8 +9,10 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 #define MONTHS 12
 #define HOURS 15
 #define INTERVAL 100
+#define INTERVAL2 1000
 
 unsigned long lastTime;
+unsigned long lastHour;
 
 typedef struct 
 {
@@ -23,6 +25,8 @@ record_type matrix[MONTHS][HOURS];
 
 int i = 0;
 int j = -1 ; //ugly af
+int mediciones = 0;
+int totLumens = 0;
 
 
 void setup() {
@@ -38,6 +42,7 @@ void setup() {
 	randomSeed(millis());
 	
 	lastTime = 0 ;
+	lastHour = 0 ;
 }
 
 void loop() {
@@ -54,15 +59,26 @@ void loop() {
 void readData(){
 	// TODO read temp & humidity
 
-
-	if ((lastTime + INTERVAL) > millis()){
-		lastTime = millis();
-		
+	if ((lastTime + INTERVAL) < millis()){
 		//int lumens = mapLumens();
+		mediciones++;
+		totLumens += random(10, 101);  //delete after test
+		
+		//totLumens = mapLumens();
+		
+		lastTime = millis();
+	}
+
+	if ((lastHour + INTERVAL2) < millis()){
+		
+		lastHour = millis();
+
 		
 		//para no tener que iluminar
-		int lumens = random(10, 101); //delete after test
-		
+		//int lumens = random(10, 101); //delete after test
+
+		int lumens = totLumens / mediciones ; //al ser int, solo guarda int
+
 		
 		if (j < (HOURS -1 ) ){
 			j++;
@@ -71,6 +87,9 @@ void readData(){
 			i++;		
 		}
 
+		Serial.print("mediciones:");
+		Serial.println(mediciones);
+		
 		Serial.print("Se leyeron :");
 		Serial.print(lumens);
 		Serial.print(" Se grabaran en :");
@@ -80,6 +99,8 @@ void readData(){
 	
 		matrix[i][j].lumens = lumens;
 		
+		mediciones = 0;
+		totLumens = 0;
 	}
 }
 
