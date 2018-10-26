@@ -1,18 +1,21 @@
-#include <LiquidCrystal.h>
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+//#include <LiquidCrystal.h>
+//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 #define LDRPin A0
 #define PushButton 2
 #define GreenLed 3
 #define YelowwLed 4
 #define RedLed 5
-#define MONTHS 12
-#define HOURS 15
+#define MONTHS 5
+#define HOURS 5
 #define INTERVAL 100
-#define INTERVAL2 1000
+#define INTERVAL2 500
+#define ROW_SET 3
 
 unsigned long lastTime;
 unsigned long lastHour;
+
+bool shown = false;
 
 typedef struct 
 {
@@ -32,13 +35,13 @@ int totLumens = 0;
 void setup() {
 	Serial.begin(9600); 
 	Serial.println("INIT");
-	pinMode(LDRPin, INPUT);
-	pinMode(PushButton, INPUT);
-	pinMode(GreenLed, OUTPUT);
-	pinMode(YelowwLed, OUTPUT);
-	pinMode(RedLed, OUTPUT);
-	lcd.begin(16, 2);	
-    lcd.print("");	
+	// pinMode(LDRPin, INPUT);
+	// pinMode(PushButton, INPUT);
+	// pinMode(GreenLed, OUTPUT);
+	// pinMode(YelowwLed, OUTPUT);
+	// pinMode(RedLed, OUTPUT);
+	// lcd.begin(16, 2);	
+    // lcd.print("Iniciando Programa");	
 	randomSeed(millis());
 	
 	lastTime = 0 ;
@@ -48,12 +51,13 @@ void setup() {
 void loop() {
 	
 	if (!dataComplete()){
-		readData();
+		// readData();
+		completeMatrixTest();
 	}
 	
 	printData();
 	
-	buttonListener();
+	//buttonListener();
 }
 
 void readData(){
@@ -84,11 +88,10 @@ void readData(){
 		}
 
 		Serial.print("mediciones:");
-		Serial.println(mediciones);
-		
-		Serial.print("Se leyeron :");
+		Serial.print(mediciones);		
+		Serial.print(", Promedio :");
 		Serial.print(lumens);
-		Serial.print(" Se grabaran en :");
+		Serial.print(", Se grabaran en :");
 		Serial.print(i);
 		Serial.print(" ,");
 		Serial.println(j);		
@@ -107,8 +110,8 @@ void printData(){
 	//TODO if end of year -> do more math......
 	
 	//show matrix via Serial
-	if (dataComplete()){
-		delay(1000);
+	
+	if (!shown && dataComplete()){
 		for (int k = 0 ; k < MONTHS ; k++){
 			Serial.print("|");			
 			for(int p = 0 ; p < HOURS ; p++){
@@ -117,7 +120,6 @@ void printData(){
 			}
 			Serial.println("|");			
 		}
-	}
 	
 	
 	if (!dataComplete()){
@@ -128,6 +130,10 @@ void printData(){
 	}
 	
 	
+		buscarMaxOpt1();
+		buscarMaxOpt2();
+		shown = true;
+	}
 }
 
 void buttonListener(){
@@ -141,5 +147,83 @@ int mapLumens(){
 }
 
 bool dataComplete(){
-	return (j == HOURS -1 && i == MONTHS -1 );
+	return (j == (HOURS -1) && i == (MONTHS -1) );
+}
+
+void buscarMaxOpt1(){	
+	
+	//crea una matriz con los maximos mensuales
+	int arrAux[MONTHS][HOURS-ROW_SET+1];	
+	
+	//inicializar la matriz - fix de un bug
+	for (int k = 0 ; k < MONTHS ; k++){		
+		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+			arrAux[k][l] = 0;
+		}
+	}
+
+	for (int k = 0 ; k < MONTHS ; k++){		
+		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+			for(int p = 0 ; p < ROW_SET ; p++){
+				arrAux[k][l] += matrix[k][l+p].lumens;
+			}
+		}
+	}
+	
+	//print por serial
+	Serial.println("Busca Max Opt1");
+	for (int k = 0 ; k < MONTHS ; k++){		
+		Serial.println("|");
+		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+			Serial.print(",");
+			Serial.print(arrAux[k][l]);
+		}
+		Serial.println("|");
+	}
+}
+
+void buscarMaxOpt2(){	
+	
+	//crea un arrar con las mediciones de todos los meses sumadas.
+	int arrAux[HOURS-ROW_SET+1];	
+	
+	//inicializar el vector - fix de un bug
+	for (int k = 0 ; k < MONTHS ; k++){		
+		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+				arrAux[l] = 0;
+		}
+	}
+
+	for (int k = 0 ; k < MONTHS ; k++){		
+		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+			for(int p = 0 ; p < ROW_SET ; p++){
+				arrAux[l] += matrix[k][l+p].lumens;
+			}
+		}
+	}
+
+	//print por serial
+	Serial.println("Busca Max Opt2");
+	Serial.println("|");	
+	for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+		Serial.print(",");
+		Serial.print(arrAux[l]);
+	}
+	Serial.println("|");
+	
+}
+
+
+//just to speed up the process
+void completeMatrixTest(){
+	j = HOURS -1;
+	i = MONTHS -1;
+	Serial.println("Cargado AUTO de la matriz");	
+	for (int k = 0 ; k < MONTHS ; k++){		
+		for(int l = 0 ; l < HOURS ; l++){
+			delay(100);
+			matrix[l][k].lumens = random(10, 101);
+		}
+	}	
+	Serial.println("FIN Cargado AUTO de la matriz");		
 }
