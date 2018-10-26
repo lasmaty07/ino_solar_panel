@@ -1,11 +1,11 @@
-//#include <LiquidCrystal.h>
-//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 #define LDRPin A0
-#define PushButton 2
-#define GreenLed 3
-#define YelowwLed 4
-#define RedLed 5
+#define PushButton 6
+#define GreenLed 7
+#define YelowwLed 8
+#define RedLed 9
 #define MONTHS 5
 #define HOURS 5
 #define INTERVAL 100
@@ -19,9 +19,10 @@ bool shown = false;
 
 typedef struct 
 {
-   int humidity;
-   int temp;
-   int lumens;
+	// comment out to save space 
+	//int humidity;
+	//int temp;
+	int lumens;
  }  record_type;
  
 record_type matrix[MONTHS][HOURS];
@@ -40,8 +41,8 @@ void setup() {
 	// pinMode(GreenLed, OUTPUT);
 	// pinMode(YelowwLed, OUTPUT);
 	// pinMode(RedLed, OUTPUT);
-	// lcd.begin(16, 2);	
-    // lcd.print("Iniciando Programa");	
+	lcd.begin(16, 2);
+    lcd.print("Iniciando");	
 	randomSeed(millis());
 	
 	lastTime = 0 ;
@@ -51,7 +52,7 @@ void setup() {
 void loop() {
 	
 	if (!dataComplete()){
-		// readData();
+		//readData();
 		completeMatrixTest();
 	}
 	
@@ -68,7 +69,7 @@ void readData(){
 		mediciones++;
 		totLumens += random(10, 101);  //delete after test
 		
-		//totLumens = mapLumens();
+		//totLumens += mapLumens();
 		
 		lastTime = millis();
 	}
@@ -153,7 +154,7 @@ bool dataComplete(){
 void buscarMaxOpt1(){	
 	
 	//crea una matriz con los maximos mensuales
-	int arrAux[MONTHS][HOURS-ROW_SET+1];	
+	int arrAux[MONTHS][HOURS-ROW_SET+1];
 	
 	//inicializar la matriz - fix de un bug
 	for (int k = 0 ; k < MONTHS ; k++){		
@@ -180,6 +181,19 @@ void buscarMaxOpt1(){
 		}
 		Serial.println("|");
 	}
+
+	//busco el maximo
+	int max1 = 0 ;
+	for (int k = 0 ; k < MONTHS ; k++){		
+		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+			if (max1 < arrAux[k][l]){
+				max1 = arrAux[k][l];
+			}			
+		}
+	}
+
+	Serial.print("Maximo de la matriz: ");
+	Serial.println(max1);
 }
 
 void buscarMaxOpt2(){	
@@ -188,10 +202,8 @@ void buscarMaxOpt2(){
 	int arrAux[HOURS-ROW_SET+1];	
 	
 	//inicializar el vector - fix de un bug
-	for (int k = 0 ; k < MONTHS ; k++){		
-		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
-				arrAux[l] = 0;
-		}
+	for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+		arrAux[l] = 0;
 	}
 
 	for (int k = 0 ; k < MONTHS ; k++){		
@@ -210,7 +222,17 @@ void buscarMaxOpt2(){
 		Serial.print(arrAux[l]);
 	}
 	Serial.println("|");
-	
+		
+	//busco el maximo
+	int max2 = 0 ;
+	for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
+		if (max2 < arrAux[l]){
+			max2 = arrAux[l];
+		}			
+	}
+
+	Serial.print("Maximo del Vector: ");
+	Serial.println(max2);
 }
 
 
@@ -218,12 +240,12 @@ void buscarMaxOpt2(){
 void completeMatrixTest(){
 	j = HOURS -1;
 	i = MONTHS -1;
-	Serial.println("Cargado AUTO de la matriz");	
+	Serial.println("Carga AUTO de la matriz");	
 	for (int k = 0 ; k < MONTHS ; k++){		
 		for(int l = 0 ; l < HOURS ; l++){
 			delay(100);
 			matrix[l][k].lumens = random(10, 101);
 		}
 	}	
-	Serial.println("FIN Cargado AUTO de la matriz");		
+	Serial.println("FIN Carga AUTO de la matriz");		
 }
