@@ -1,5 +1,5 @@
-#include <LiquidCrystal.h>
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+//#include <LiquidCrystal.h>
+//LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 #define LDRPin A0
 #define PushButton 6
@@ -41,8 +41,8 @@ void setup() {
 	// pinMode(GreenLed, OUTPUT);
 	// pinMode(YelowwLed, OUTPUT);
 	// pinMode(RedLed, OUTPUT);
-	lcd.begin(16, 2);
-    lcd.print("Iniciando");	
+	//lcd.begin(16, 2);
+    //lcd.print("Iniciando");	
 	randomSeed(millis());
 	
 	lastTime = 0 ;
@@ -122,7 +122,7 @@ void printData(){
 			Serial.println("|");			
 		}
 	
-	
+	//TODO agregar mas interaccion con los LEDs
 	if (!dataComplete()){
 		digitalWrite(RedLed,HIGH);
 	}else {
@@ -174,9 +174,9 @@ void buscarMaxOpt1(){
 	//print por serial
 	Serial.println("Busca Max Opt1");
 	for (int k = 0 ; k < MONTHS ; k++){		
-		Serial.println("|");
+		Serial.print("|");
 		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
-			Serial.print(",");
+			if	(l != 0 ) Serial.print(",");
 			Serial.print(arrAux[k][l]);
 		}
 		Serial.println("|");
@@ -216,9 +216,9 @@ void buscarMaxOpt2(){
 
 	//print por serial
 	Serial.println("Busca Max Opt2");
-	Serial.println("|");	
+	Serial.print("|");	
 	for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
-		Serial.print(",");
+		if	(l != 0 ) Serial.print(",");
 		Serial.print(arrAux[l]);
 	}
 	Serial.println("|");
