@@ -162,6 +162,7 @@ void buttonListener(){
 
 			if (option == 0){
 				bool reset = false;
+				byte moveButtonStateAnt = HIGH;
 
 				delay(100);
 				enterButtonState = digitalRead(enterButton);
@@ -175,9 +176,9 @@ void buttonListener(){
 
 				delay(200);
 				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) > millis()){
-					moveButtonState = digitalRead(moveButton);	
+					moveButtonState = digitalRead(moveButton);						
 					lcd.setCursor(0,1);
-					if (moveButtonState == LOW ){
+					if (moveButtonState == LOW && moveButtonStateAnt != moveButtonState){
 						if (reset){
 							reset = false;
 						} else {
@@ -191,7 +192,7 @@ void buttonListener(){
 							Serial.println("NO");
 						}
 					}
-					delay(200);
+					moveButtonStateAnt = moveButtonState;
 					enterButtonState = digitalRead(enterButton);
 				}	
 				//clear before exit
