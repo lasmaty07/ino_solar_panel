@@ -1,13 +1,13 @@
 #include <LiquidCrystal.h>
 #include <string.h>
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 
 #define LDRPin A0
 #define enterButton 6
-#define moveButton 13
-#define GreenLed 7
-#define YelowLed 8
-#define RedLed 9
+#define moveButton 5
+#define GreenLed 4
+#define YelowLed 3
+#define RedLed 2
 #define MONTHS 5
 #define HOURS 5
 #define INTERVAL 100
@@ -15,17 +15,19 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 #define ROW_SET 3
 #define LOW_LIGHT 33
 #define MID_LIGHT 66
-#define MENU_TIMEOUT 1000
+#define MENU_TIMEOUT 10000
 
 unsigned long lastTime;
 unsigned long lastHour;
 unsigned long enterMenu;
-
 int enterButtonState;
 int moveButtonState;
 int buttonStateAnt;
-
 int numberOptionsMenu = 3;
+int i = 0;
+int j = -1 ; //ugly af
+int mediciones = 0;
+int totLumens = 0;
 
 bool shown = false;
 
@@ -38,12 +40,6 @@ typedef struct
  }  record_type;
  
 record_type matrix[MONTHS][HOURS];
-
-int i = 0;
-int j = -1 ; //ugly af
-int mediciones = 0;
-int totLumens = 0;
-
 
 void setup() {
 	Serial.begin(9600); 
@@ -77,6 +73,8 @@ void loop() {
 	printData();
 	
 	buttonListener();
+
+
 }
 
 void readData(){
@@ -151,19 +149,21 @@ void buttonListener(){
 	//TODO 
 	//fancy stuff on display on button push
 	enterButtonState = digitalRead(enterButton);
-
+	
 	if (dataComplete() && enterButtonState == LOW ){
 		//enters menu
 		delay(50); //debug bounce effect
 		enterMenu = millis();
 		enterButtonState = digitalRead(enterButton);
+		Serial.println(enterButtonState);
+		Serial.println(enterMenu);
 		int option = 0 ;
-		while ( option < numberOptionsMenu && (enterMenu + MENU_TIMEOUT) < millis()) {
+		while ( option < numberOptionsMenu && (enterMenu + MENU_TIMEOUT) > millis()) {
 
-			if (i == 0){
+			if (option == 0){
 				bool reset = false;
 
-				delay(200);
+				delay(100);
 				enterButtonState = digitalRead(enterButton);
 				
 				lcd.clear();
@@ -171,27 +171,70 @@ void buttonListener(){
 				lcd.setCursor(0,0);
 				lcd.print("Reiniciar programa");
 				lcd.setCursor(0,1);		
+				lcd.print("No");
 
-				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) < millis()){
+				delay(200);
+				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) > millis()){
 					moveButtonState = digitalRead(moveButton);	
 					lcd.setCursor(0,1);
 					if (moveButtonState == LOW ){
-						lcd.print(reset ? "YES" : "NO");
-						reset = true;
-						//faltaaaaa
-					}					
-
-					delay(100);
+						if (reset){
+							reset = false;
+						} else {
+							reset = true;
+						}
+						if (reset){
+							lcd.print("Si");
+							Serial.println("SI");
+						} else {
+							lcd.print("No");
+							Serial.println("NO");
+						}
+					}
+					delay(200);
 					enterButtonState = digitalRead(enterButton);
-				}		
+				}	
+				//clear before exit
+				lcd.clear();
+				delay(200);
+				if (reset){
+					Serial.println("Reseteo");
+					resetData();
+				}
+				option++;
+			}
+			if (enterButtonState == LOW){
+				enterMenu = millis();
+			}
+			if (option == 1 && (enterMenu + MENU_TIMEOUT) > millis()){
+				Serial.println("segunda Opcion");
+				delay(200);
+				lcd.print("Cambiar rango");
+				enterButtonState = digitalRead(enterButton);
+				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) > millis()){
+					//TODO cambiar variable de horas de luz
+					enterButtonState = digitalRead(enterButton);
+				}
+				lcd.clear();
+				option++;
+			}
+			if (enterButtonState == LOW){
+				enterMenu = millis();
+			}
+			if (option == 2 && (enterMenu + MENU_TIMEOUT) > millis()){
+				Serial.println("Tercera Opcion");
+				delay(200);
+				lcd.print("Cambiar Horas luz");
+				enterButtonState = digitalRead(enterButton);
+				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) > millis()){
+					//TODO cambiar variable de cantidad de horas de luz
+					enterButtonState = digitalRead(enterButton);
+				}
+				lcd.clear();
+				option++;
 			}
 
 		}
-		//reset
-		i = 0;
-		j = 0;
-		shown = false;
-		lcd.clear();
 	}
 }
 
@@ -371,4 +414,10 @@ void printInit(){
 	lcd.print(HOURS);
 	lcd.print(" Set: ");
 	lcd.print(ROW_SET);
+}
+
+void resetData(){
+	i = 0;
+	j = 0;
+	shown = false;
 }
