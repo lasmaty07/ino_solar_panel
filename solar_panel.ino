@@ -1,5 +1,5 @@
 #include <LiquidCrystal.h>
-#include <string.h>
+//#include <string.h>
 LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 
 #define LDRPin A0
@@ -12,7 +12,6 @@ LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 #define HOURS 5
 #define INTERVAL 100
 #define INTERVAL2 500
-#define ROW_SET 3
 #define LOW_LIGHT 33
 #define MID_LIGHT 66
 #define MENU_TIMEOUT 10000
@@ -28,6 +27,7 @@ int i = 0;
 int j = -1 ; //ugly af
 int mediciones = 0;
 int totLumens = 0;
+int ROW_SET = 3;
 
 bool shown = false;
 
@@ -66,8 +66,8 @@ void loop() {
 	
 	if (!dataComplete()){
 		printInit();
-		//readData();
-		completeMatrixTest();
+		readData();
+		//completeMatrixTest();
 	}
 	
 	printData();
@@ -149,20 +149,22 @@ void buttonListener(){
 	//TODO 
 	//fancy stuff on display on button push
 	enterButtonState = digitalRead(enterButton);
+
+	if (!dataComplete() && enterButtonState == LOW ){
+		resetData();
+	}
 	
 	if (dataComplete() && enterButtonState == LOW ){
 		//enters menu
 		delay(50); //debug bounce effect
 		enterMenu = millis();
 		enterButtonState = digitalRead(enterButton);
-		Serial.println(enterButtonState);
-		Serial.println(enterMenu);
+		byte moveButtonStateAnt = HIGH;
 		int option = 0 ;
 		while ( option < numberOptionsMenu && (enterMenu + MENU_TIMEOUT) > millis()) {
 
 			if (option == 0){
 				bool reset = false;
-				byte moveButtonStateAnt = HIGH;
 
 				delay(100);
 				enterButtonState = digitalRead(enterButton);
@@ -199,7 +201,6 @@ void buttonListener(){
 				lcd.clear();
 				delay(200);
 				if (reset){
-					Serial.println("Reseteo");
 					resetData();
 				}
 				option++;
@@ -211,9 +212,18 @@ void buttonListener(){
 				Serial.println("segunda Opcion");
 				delay(200);
 				lcd.print("Cambiar rango");
+				lcd.setCursor(0,1);		
+				lcd.print(ROW_SET);
 				enterButtonState = digitalRead(enterButton);
 				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) > millis()){
 					//TODO cambiar variable de horas de luz
+					moveButtonState = digitalRead(moveButton);						
+					lcd.setCursor(0,1);
+					if (moveButtonState == LOW && moveButtonStateAnt != moveButtonState){
+						ROW_SET++;
+						lcd.print(ROW_SET);
+					}					
+					moveButtonStateAnt = moveButtonState;
 					enterButtonState = digitalRead(enterButton);
 				}
 				lcd.clear();
@@ -250,6 +260,7 @@ bool dataComplete(){
 
 void buscarMaxOpt1(){	
 	
+	lcd.clear();
 	//crea una matriz con los maximos mensuales
 	int arrAux[MONTHS][HOURS-ROW_SET+1];
 	
@@ -281,6 +292,8 @@ void buscarMaxOpt1(){
 
 	//busco el maximo	
 	Serial.println("Maximo de la matriz: ");	
+	lcd.setCursor(0,0);
+	lcd.print("Maximo por mes:");
 	for (int k = 0 ; k < MONTHS ; k++){		
 		int max1 = 0 ;
 		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
@@ -288,14 +301,21 @@ void buscarMaxOpt1(){
 				max1 = arrAux[k][l];
 			}			
 		}
+		lcd.setCursor(0,1);
+		lcd.print("                ");
+		lcd.setCursor(0,1);
+		lcd.print(getMonth(k));
+		lcd.print(" ");
+		lcd.print(max1);
 		Serial.print(getMonth(k));
 		Serial.print("\t");
 		Serial.println(max1);
+		delay(1000);
 	}
 }
 
 void buscarMaxOpt2(){	
-	
+	lcd.clear();
 	//crea un arrar con las mediciones de todos los meses sumadas.
 	int arrAux[HOURS-ROW_SET+1];	
 	
@@ -332,6 +352,11 @@ void buscarMaxOpt2(){
 	Serial.print("Maximo del Vector: ");
 	Serial.println("\t");
 	Serial.println(max2);
+	lcd.setCursor(0,0);
+	lcd.print("Maximo Total");
+	lcd.setCursor(0,1);
+	lcd.print(max2);
+	delay(1000);
 }
 
 
@@ -407,18 +432,21 @@ String getMonth(int mm){
 }
 
 void printInit(){
-	Serial.println("Se inicia la lectura de datos");
-	lcd.setCursor(0, 0);
-	lcd.print("Leyendo datos");
-	lcd.setCursor(0, 1);
-	lcd.print("Horas: ");
-	lcd.print(HOURS);
-	lcd.print(" Set: ");
-	lcd.print(ROW_SET);
+	//Serial.println("Se inicia la lectura de datos");
+	if (!shown && i == 0 && j == 0 ){
+		lcd.setCursor(0, 0);
+		lcd.print("Leyendo datos");
+		lcd.setCursor(0, 1);
+		lcd.print("Horas: ");
+		lcd.print(HOURS);
+		lcd.print(" Set: ");
+		lcd.print(ROW_SET);
+	}
 }
 
 void resetData(){
 	i = 0;
 	j = 0;
 	shown = false;
+	Serial.println("Reseteo");
 }
