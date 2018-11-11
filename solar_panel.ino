@@ -120,11 +120,6 @@ void readData(){
 }
 
 void printData(){
-	//TODO 
-	//if end of month print stats -> do math
-	
-	//TODO if end of year -> do more math......
-	
 	//show matrix via Serial
 	
 	if (!shown && dataComplete()){
@@ -315,6 +310,7 @@ void buscarMaxOpt1(){
 }
 
 void buscarMaxOpt2(){	
+	
 	lcd.clear();
 	//crea un arrar con las mediciones de todos los meses sumadas.
 	int arrAux[HOURS-ROW_SET+1];	
@@ -343,9 +339,11 @@ void buscarMaxOpt2(){
 		
 	//busco el maximo
 	int max2 = 0 ;
+	int max2_place ;
 	for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
 		if (max2 < arrAux[l]){
 			max2 = arrAux[l];
+			max2_place = l+1;
 		}			
 	}
 
@@ -355,6 +353,8 @@ void buscarMaxOpt2(){
 	lcd.setCursor(0,0);
 	lcd.print("Maximo Total");
 	lcd.setCursor(0,1);
+	lcd.print(getMonth(max2_place));
+	lcd.print(" ");
 	lcd.print(max2);
 	delay(1000);
 }
