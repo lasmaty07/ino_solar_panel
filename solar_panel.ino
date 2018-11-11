@@ -291,9 +291,11 @@ void buscarMaxOpt1(){
 	lcd.print("Maximo por mes:");
 	for (int k = 0 ; k < MONTHS ; k++){		
 		int max1 = 0 ;
+		int max1_place ;
 		for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
 			if (max1 < arrAux[k][l]){
 				max1 = arrAux[k][l];
+				max1_place = l ;
 			}			
 		}
 		lcd.setCursor(0,1);
@@ -301,10 +303,11 @@ void buscarMaxOpt1(){
 		lcd.setCursor(0,1);
 		lcd.print(getMonth(k));
 		lcd.print(" ");
-		lcd.print(max1);
+		lcd.print(franjaHoraria(max1_place));
 		Serial.print(getMonth(k));
 		Serial.print("\t");
-		Serial.println(max1);
+		Serial.println(franjaHoraria(max1_place));
+		Serial.println(max1_place);
 		delay(1000);
 	}
 }
@@ -343,7 +346,7 @@ void buscarMaxOpt2(){
 	for(int l = 0 ; l < (HOURS-ROW_SET+1) ; l++){
 		if (max2 < arrAux[l]){
 			max2 = arrAux[l];
-			max2_place = l+1;
+			max2_place = l;
 		}			
 	}
 
@@ -351,11 +354,9 @@ void buscarMaxOpt2(){
 	Serial.println("\t");
 	Serial.println(max2);
 	lcd.setCursor(0,0);
-	lcd.print("Maximo Total");
+	lcd.print("Maximo Total:");
 	lcd.setCursor(0,1);
-	lcd.print(getMonth(max2_place));
-	lcd.print(" ");
-	lcd.print(max2);
+	lcd.print(franjaHoraria(max2_place));
 	delay(1000);
 }
 
@@ -449,4 +450,16 @@ void resetData(){
 	j = 0;
 	shown = false;
 	Serial.println("Reseteo");
+}
+
+String franjaHoraria(int pos){
+	//given a certain position, returns the hours for that pos according the ROW_SET
+	int posAux = pos + 5 ;
+	String out;
+	for (int l = 0; l < ROW_SET; l++){
+		out = out + String(posAux) + ", ";
+		posAux++;
+	}
+
+	return out;
 }
