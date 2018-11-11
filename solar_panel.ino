@@ -9,7 +9,6 @@ LiquidCrystal lcd(7, 8, 9, 10, 11, 12);
 #define YelowLed 3
 #define RedLed 2
 #define MONTHS 5
-#define HOURS 5
 #define INTERVAL 100
 #define INTERVAL2 500
 #define LOW_LIGHT 33
@@ -28,6 +27,8 @@ int j = -1 ; //ugly af
 int mediciones = 0;
 int totLumens = 0;
 int ROW_SET = 3;
+//int HOURS = 5;
+#define HOURS 5
 
 bool shown = false;
 
@@ -67,7 +68,6 @@ void loop() {
 	if (!dataComplete()){
 		printInit();
 		readData();
-		//completeMatrixTest();
 	}
 	
 	printData();
@@ -76,6 +76,7 @@ void loop() {
 
 
 }
+
 
 void readData(){
 	// TODO read temp & humidity
@@ -211,7 +212,6 @@ void buttonListener(){
 				lcd.print(ROW_SET);
 				enterButtonState = digitalRead(enterButton);
 				while ( enterButtonState == HIGH && (enterMenu + MENU_TIMEOUT) > millis()){
-					//TODO cambiar variable de horas de luz
 					moveButtonState = digitalRead(moveButton);						
 					lcd.setCursor(0,1);
 					if (moveButtonState == LOW && moveButtonStateAnt != moveButtonState){
@@ -358,21 +358,6 @@ void buscarMaxOpt2(){
 	lcd.setCursor(0,1);
 	lcd.print(franjaHoraria(max2_place));
 	delay(1000);
-}
-
-
-//just to speed up the process
-void completeMatrixTest(){
-	j = HOURS -1;
-	i = MONTHS -1;
-	Serial.println("Carga AUTO de la matriz");	
-	for (int k = 0 ; k < MONTHS ; k++){		
-		for(int l = 0 ; l < HOURS ; l++){
-			delay(100);
-			matrix[l][k].lumens = random(10, 101);
-		}
-	}	
-	Serial.println("FIN Carga AUTO de la matriz");		
 }
 
 void showLED(int lum){
